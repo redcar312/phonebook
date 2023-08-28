@@ -1,5 +1,5 @@
 import axios from "axios";
-const url = '/api/notes'
+const url = '/api/persons'
 
 
  export const getAll = () => {
