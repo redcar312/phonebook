@@ -1,9 +1,12 @@
-
 import { useState, useEffect } from 'react'
 import {getAll, create, deletePerson, updatePerson} from  './services'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 import Form from './components/Form'
 import Filter from './components/Filter'
 import Persons from './components/Persons'
+
 const App = () => {
  
 
