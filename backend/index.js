@@ -9,9 +9,9 @@ app.use(express.json())
 app.use(cors())
 
 
-const url = process.env.MONGO_URI
 
-mongoose.connect(url)
+
+mongoose.connect(process.env.MONGO_URI)
 .then(res => {
   console.log('connected')
 }).catch((err) => {
