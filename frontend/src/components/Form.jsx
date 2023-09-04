@@ -1,4 +1,4 @@
-const Form = ({ newNumber, setNewNumber, handleSubmit, handleNameChange }) => {
+const Form = ({ newNumber, setNewNumber, handleSubmit, newName, handleNameChange }) => {
    
    
    
@@ -6,10 +6,10 @@ const Form = ({ newNumber, setNewNumber, handleSubmit, handleNameChange }) => {
     return(
         <form onSubmit={handleSubmit}>
         <div>
-          name: <input onChange={handleNameChange} />
+          name: <input type="text" value={newName} onChange={handleNameChange} />
         </div>
         <div>
-          number: <input value={newNumber} onChange={e => setNewNumber(e.target.value)} />
+          number: <input type="tel" value={newNumber} onChange={e => setNewNumber(e.target.value)} />
         </div>
         <div>
           <button type="submit" onChange={handleNameChange}>add</button>

@@ -1,82 +1,134 @@
 const express = require('express')
 const cors = require('cors')
+const mongoose = require('mongoose')
+const Person = require('./modules/persons')
+require('dotenv').config()
 const app = express()
+app.use(express.static('dist'))
 app.use(express.json())
 app.use(cors())
-app.use(express.static('dist'))
-let persons = [
-      { 
-        "name": "Arto Hellas", 
-        "number": "040-123456",
-        "id": 1
-      },
-      { 
-        "name": "Ada Lovelace", 
-        "number": "39-44-5323523",
-        "id": 2
-      },
-      { 
-        "name": "Dan Abramov", 
-        "number": "12-43-234345",
-        "id": 3
-      },
-      { 
-        "name": "Mary Poppendieck", 
-        "number": "39-23-6423122",
-        "id": 4
-      }
-    ]
-  
 
-  const generateId = () => {
-    const maxId = persons.length > 0 ?
-    Math.max(...persons.map(person => person.id)):
-    0
-    return maxId + 1  
-  }  
-  app.get('/api/persons', (req, res) => {
-    res.json(persons)
-  })
 
-  app.get("/api/persons/:id", (req, res) => {
-    const id = req.params.id
-    const foundUser = persons.find(person => person.id == id)
-    if(foundUser) {
-        res.status(200).json(foundUser)
-    } else {
-        res.status(404).end()
+const url = process.env.MONGO_URI
+
+mongoose.connect(url)
+.then(res => {
+  console.log('connected')
+}).catch((err) => {
+  console.log(err.message)
+}) 
+
+
+
+
+
+   
+
+  app.get('/api/persons', async (req, res, next) => {
+    
+    try {
+    const people = await Person.find()
+    res.json(people)
+    } catch(err) {
+      res.status(500).end()
     }
   })
 
-app.delete("/api/persons/:id", (req, res) => {
+  app.get("/api/persons/:id",async (req, res) => {
+    try{
     const id = req.params.id
-    
-    persons = persons.filter(person => person.id != id)
-    res.status(204).end()
+    const foundUser = await Person.findById(id)
+    if(foundUser) {
+        res.status(200).json(foundUser)
+    } else {
+        res.status(404).json({error: "user not found"})
+    }
 
+  } catch(err) {
+    res.status(500).end()
+  }
+  })
+
+app.delete("/api/persons/:id", async (req, res) => {
+    
+  try{
+  const id = req.params.id
+  await Person.findByIdAndDelete(id).then(result => {
+    res.json({msg:"deleted"})
+  })
+    
+   
+  } catch(err){
+    res.status(500).end()
+  }
 })
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", async (req, res, next) => {
+    
+  try {
+  
     const body = req.body
-    const foundUser = persons.find(person => person.name.toLowerCase() === body.name.toLowerCase())
+    const foundUser = await Person.findOne({
+      $or: [{name: body.name}, {name: body.name.toLowerCase()}]
+    })
+    
+    
+    
     if(!body.number || !body.name) {
       return res.status(400).json({
         error: 'Please insert both name and number'
       })
     } else if(foundUser){
-      return res.status(400).json({
-        error:'a user whit that name already exists'
-      })
+      return res.status(400).json({error: "user already exists"})
     } else {
-      const personObj = {
+     
+
+      const newUser =  new Person({
         name: body.name,
         number: body.number,
-        id: generateId()
-      }
-      persons = [...persons, personObj]
-      res.json(personObj)
+      
+      })
+      await newUser.save().then(result => {
+        res.json(newUser)
+       
+      }).catch(error => next(error))
+    
     }
+  } catch (err) {
+    res.status(500).end()
+  }
+  
 })
+
+
+app.put("/api/persons/:id", async (req, res, next) => {
+  
+  try{
+  const body = req.body
+  const foundUser =  Person.findById(body.id)
+  if(!foundUser) {
+      return res.status(404).end()
+  } else if(!body.name || !body.number){
+      return res.status(400).json({error: "insert both name and number"})
+  } else {
+      await Person.findByIdAndUpdate(req.params.id, {
+      name: body.name,
+      number: body.number
+     }, {new:true}).then(result => {
+      
+      
+      res.status(200).json(result)
+     })
+    
+
+
+  }
+
+  } catch(err) {
+    res.status(500).end()
+  }
+})
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)

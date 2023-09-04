@@ -1,5 +1,5 @@
-const Persons = ({ filterVal, filterArr, persons, handleDeletion}) => {
-  
+const Persons = ({ filterVal, persons, handleDeletion}) => {
+  const copyArr = [...persons]
 
   
   
@@ -7,17 +7,17 @@ const Persons = ({ filterVal, filterArr, persons, handleDeletion}) => {
     return(
     <div>
             {filterVal?
-           filterArr.map((data) => {
+           copyArr.filter(person => person.name.toLowerCase().includes(filterVal.toLowerCase())).map((data) => {
             return(<div>
-            <p key={data.name}>{data.name}: {data.number}</p>
+            <p key={data.id}>{data.name}: {data.number}</p>
             <button onClick={() => handleDeletion(data.id)}>Delete</button>
             </div>)
            }) 
         
-          :persons.map((person) => {
+          :copyArr.map((person) => {
           return(
           <div>
-          <p key={person.name}>{person.name}: {person.number}</p>
+          <p key={person.id}>{person.name}: {person.number}</p>
           <button onClick={() => handleDeletion(person.id)}>Delete</button>
             </div>
           )

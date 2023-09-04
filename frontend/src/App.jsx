@@ -17,16 +17,17 @@ const App = () => {
   const [filterVal, setFilterVal] = useState('')
   
   
-  const filterArr = persons.filter(person => person.name.toLowerCase().includes(filterVal.toLowerCase()))
+  
 
   useEffect(() => {
      getAll()
     .then(res => {
       
       setPersons(res.data)
+      
     })
+ 
 },[])
-
 
 
   const handleFilter = (e) => {
@@ -50,14 +51,43 @@ const App = () => {
 
 const handleSubmit = (e) => {
    e.preventDefault() 
+  const foundUser = persons.find(person => newName.toLowerCase() === person.name.toLowerCase())
+  let personObject 
 
- 
+
+  if(foundUser) { 
+      const id = foundUser.id
+      personObject = {...foundUser, number:newNumber}
+      if(window.confirm(`user named ${newName} already exists. Would you like to update it.`)){
+        updatePerson(personObject).then(res => {
+          console.log(res.data)
+          setPersons(persons.map(person => 
+            person.id !== id ? person : res.data
+            ))
+            setNewName('')
+            setNewNumber('')
+        }).catch(err => {
+          console.log(err)
+        }) 
 
 
-  const personObject = {
-    name: newName,
-    number:newNumber
-   }
+
+
+      }else {
+        setNewName('')
+        setNewNumber('')
+        return
+      }
+
+
+
+  } else {
+    personObject = {
+      name: newName,
+      number:newNumber
+     }
+
+  
     create(personObject)
    .then(res => 
           {setPersons(persons.concat(personObject))
@@ -65,7 +95,7 @@ const handleSubmit = (e) => {
           setNewNumber('')
 })
   }
-
+}
 const handleDeletion = (id) => {
   
   console.log(id)
@@ -79,9 +109,9 @@ const handleDeletion = (id) => {
       <h2>Phonebook</h2>
       <Filter handleFilter={handleFilter}></Filter>
       <h2>Add a new person</h2>
-      <Form newNumber={newNumber} setNewNumber={setNewNumber} handleSubmit={handleSubmit} handleNameChange={handleNameChange} ></Form>
+      <Form newNumber={newNumber} setNewNumber={setNewNumber} handleSubmit={handleSubmit} newName={newName} handleNameChange={handleNameChange} ></Form>
       <h2>Numbers</h2>
-       <Persons filterVal={filterVal} filterArr={filterArr} persons={persons} handleDeletion={handleDeletion} ></Persons>
+       <Persons filterVal={filterVal}  persons={persons} handleDeletion={handleDeletion} ></Persons>
     </div>
   )
 
