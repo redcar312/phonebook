@@ -17,8 +17,8 @@ const url = '/api/persons'
 }
 
  export const updatePerson = (personObj) => {
-  const res = axios.put(`${url}/${personObj.id}`, personObj)
-  return res.then(res.data)
+  return axios.put(`${url}/${personObj.id}`, personObj)
+
     
 }
 
